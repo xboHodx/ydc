@@ -1,14 +1,27 @@
 {
   "name": "koishi-plugin-ydc",
   "description": "大餐bot",
-  "version": "0.0.1",
+  "contributors": [    
+    "yoki"
+  ],
+  "koishi": {
+    "description": { 
+      "en": "track dc, show statistics",
+      "zh": "记录群友大餐瞬间，统计大餐王"
+    },
+    "service": {
+      "required": ["database"], 
+      "implements": ["dialogue"]
+    }
+  },
+  "version": "0.0.12",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
     "lib",
     "dist"
   ],
-  "license": "MIT",
+  "license": "WTFPL",
   "scripts": {},
   "keywords": [
     "chatbot",
@@ -17,6 +30,7 @@
   ],
   "devDependencies": {},
   "peerDependencies": {
-    "koishi": "^4.17.9"
+    "koishi": "^4.17.9",
+    "sharp": "^0.33.4"
   }
 }
