@@ -281,13 +281,11 @@ image:
     });
 
     ctx.command('ydb',{ hidden: true })
-    .alias('dn')
     .action((_)=>{
         return Random.int(0, 1) == 1? "太傻逼了，别恶心我":"太恶心了，别傻逼我";
     });
 
     ctx.command('ysm',{ hidden: true })
-    .alias('dn')
     .action((_)=>{
         return Random.int(0, 1) == 1? "太晒妹了，别恶心我":"太恶心了，别晒妹我";
     });
