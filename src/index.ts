@@ -280,6 +280,18 @@ image:
         return;
     });
 
+    ctx.command('ydb',{ hidden: true })
+    .alias('dn')
+    .action((_)=>{
+        return Random.int(0, 1) == 1? "太傻逼了，别恶心我":"太恶心了，别傻逼我";
+    });
+
+    ctx.command('ysm',{ hidden: true })
+    .alias('dn')
+    .action((_)=>{
+        return Random.int(0, 1) == 1? "太晒妹了，别恶心我":"太恶心了，别晒妹我";
+    });
+
     var ydc_lock = false;
     ctx.command('ydc [arg0:string]', '记录群友大餐瞬间')
     .alias('ydc?')
@@ -309,6 +321,11 @@ image:
             if(elem.type == 'img'){
                 url = elem.attrs.src;
                 file = elem.attrs.file;
+                // fix metadata added in newer version of napcat
+                let tmp = file.match(/\.(.+?\..+?)$/);
+                if(tmp){
+                    file = tmp[1];
+                }
             }
         }
         if(url.length == 0){
@@ -385,7 +402,7 @@ image:
         if(elements.length != 1 || elements[0].type!='at'){
             return "错误用法";
         }
-        const user_id = elements[0].attrs.id;
+        const user_id = elements[0].attrs.id;(/\.(.+?\..+?)$/)
         
         var records = await ctx.database.select('dc_table')
         .where(row => $.and($.eq(row.user, user_id), $.eq(row.channelId, guild_id)))
