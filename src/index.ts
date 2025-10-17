@@ -9,6 +9,10 @@ import fs from 'node:fs';
 export const name = 'ydc'
 export const inject = ['database', 'console']
 
+// todo:
+// review: support range expressions, e.g. 2240-2245
+// csm: when the user is not in the group, change text and turn image into grayscale
+
 declare module 'koishi' {
 namespace Command {
     interface Config {
@@ -56,7 +60,7 @@ export function apply(ctx: Context, cfg: Config) {
             fs.mkdirSync(path, {recursive:true});
         }
         if(!fs.existsSync(temp_path)){
-            fs.mkdirSync(temp_path);
+            fs.mkdirSync(temp_path, {recursive:true});
         }
     });
 
@@ -282,12 +286,12 @@ image:
 
     ctx.command('ydb',{ hidden: true })
     .action((_)=>{
-        return Random.int(0, 1) == 1? "太傻逼了，别恶心我":"太恶心了，别傻逼我";
+        return Math.random() > 0.5 ? "太傻逼了，别恶心我":"太恶心了，别傻逼我";
     });
 
     ctx.command('ysm',{ hidden: true })
     .action((_)=>{
-        return Random.int(0, 1) == 1? "太晒妹了，别恶心我":"太恶心了，别晒妹我";
+        return Math.random() > 0.5 ? "太晒妹了，别恶心我":"太恶心了，别晒妹我";
     });
 
     var ydc_lock = false;
