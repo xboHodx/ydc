@@ -255,7 +255,7 @@ image:
             var tasks = [];
             for(let item of items){
                 if(!fs.existsSync(path + item.channelId + '/' +item.user)){
-                    fs.mkdirSync(path + item.channelId + '/' +item.user);
+                    fs.mkdirSync(path + item.channelId + '/' +item.user, {recursive:true});
                 }
                 fs.copyFileSync(temp_path + item.path, path + item.channelId + '/' + item.user+ '/' + item.path);
             }
