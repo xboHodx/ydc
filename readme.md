@@ -43,7 +43,7 @@ npm i koishi-plugin-ydc sharp
 
 - master：string，默认 ""。只有 master 可使用审核和统计生成等管理指令。
 - self：string，默认 ""。机器人账号 ID，用于解析群里以 @机器人 开头的指令。
-- readers：string[]，默认 []。其他审核人账号 ID（当前版本中尚未实际使用，保留字段）。
+- readers：string[]，默认 []。其他审核人账号 ID。
 - dataDir：string，默认 "ydc_files"。本地图片存储目录（相对 Koishi 工作目录）。
 - smallReply：boolean，默认 false。开启后在提示去重/待审核等场景使用 200px 的小图回复，减少刷屏。
 
@@ -83,11 +83,11 @@ npm i koishi-plugin-ydc sharp
 - ydc [@用户] / ydc?：记录大餐（需引用包含图片的消息）
 - csm：随机推荐吃什么（群内历史记录）
 - dccr @用户 [-nr]：查看该用户的一条大餐记录（默认随机，-nr 取最新）
-- dcw [--new]：查看/生成大餐王（--new 仅 master 可用）
+- dcw [--new]：查看/生成大餐王（--new 仅 master 和 readers 可用）
 - dcstatistics | dcstat：数据库统计
-- review [-n 数量]：查看待审核（仅 master）
-- accept [id ...] | ac：通过待审核（仅 master）
-- deny [id ...] | dn：拒绝待审核（仅 master）
+- review [-n 数量]：查看待审核（仅 master 和 readers）
+- accept [id ...] | ac：通过待审核（仅 master 和 readers）
+- deny [id ...] | dn：拒绝待审核（仅 master 和 readers）
 
 提示：部分命令只支持群聊（例如 `ydc`、`csm`、`dcw`），私聊会提示「只能在群聊中使用」。
 
@@ -133,9 +133,6 @@ npm i koishi-plugin-ydc sharp
 
 - 为何提示「只能在群聊中使用」？
 	- 该命令仅在群聊上下文可用，请在群内执行。
-
-- 我需要配置 readers 吗？
-	- 当前版本 readers 字段尚未启用，配置与否不影响实际行为。
 
 - 图片去重的依据是什么？
 	- 以 url + user + path 组合判定是否重复。
