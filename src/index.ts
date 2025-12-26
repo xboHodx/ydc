@@ -209,21 +209,19 @@ export function apply(ctx: Context, cfg: Config) {
         // Check if the user is still in the group
         var isUserInGroup = true;
         try {
-            const member = await argv.session.bot.getGuildMember(guild_id, record.user);
-            if (!member) {
-                isUserInGroup = false;
-            }
+            await argv.session.bot.getGuildMember(guild_id, record.user);
         } catch (e) {
             // If getGuildMember throws an error, assume user is not in the group
             isUserInGroup = false;
         }
         
         // Process image - turn to grayscale if user is not in the group
+        const imagePath = path + guild_id + '/'  + record.user+ '/' + record.path;
         var img_buf;
         if (isUserInGroup) {
-            img_buf = await sharp(path + guild_id + '/'  + record.user+ '/' + record.path).jpeg().toBuffer();
+            img_buf = await sharp(imagePath).jpeg().toBuffer();
         } else {
-            img_buf = await sharp(path + guild_id + '/'  + record.user+ '/' + record.path).grayscale().jpeg().toBuffer();
+            img_buf = await sharp(imagePath).grayscale().jpeg().toBuffer();
         }
         
         // Change text based on whether user is in the group
