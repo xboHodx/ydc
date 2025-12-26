@@ -9,7 +9,7 @@ import fs from 'node:fs';
 export const name = 'ydc'
 export const inject = ['database', 'console']
 
-// todo:
+// todo: when the user is not in the group, change text and turn image into grayscale
 // review: support range expressions, e.g. 2240-2245
 // csm: when the user is not in the group, change text and turn image into grayscale
 
