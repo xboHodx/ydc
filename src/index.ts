@@ -246,7 +246,7 @@ image:
     // ctx.command('accept [...args:number]', { hidden: true })
     // .alias('ac')
     // .action(async (argv, ...args)=>{
-    //     if(argv.session.userId!=cfg.master && cfg.readers.includes(argv.session.userId))
+    //     if(argv.session.userId!=cfg.master && !cfg.readers.includes(argv.session.userId))
     //         return h.at(argv.session.userId)+" 你不能那么做";
     //     if(args.length == 0)
     //         return;
@@ -272,7 +272,7 @@ image:
     ctx.command('accept [..._args:string]', { hidden: true })
     .alias('ac')
     .action(async (argv, ..._args)=>{
-        if(argv.session.userId!=cfg.master && cfg.readers.includes(argv.session.userId))
+        if(argv.session.userId!=cfg.master && !cfg.readers.includes(argv.session.userId))
             return h.at(argv.session.userId)+" 你不能那么做";
         if(_args.length == 0)
             return;
