@@ -9,9 +9,7 @@ import fs from 'node:fs';
 export const name = 'ydc'
 export const inject = ['database', 'console']
 
-// todo:
-// review: support range expressions, e.g. 2240-2245
-// csm: when the user is not in the group, change text and turn image into grayscale
+//todo: review: support range expressions, e.g. 2240-2245
 
 declare module 'koishi' {
 namespace Command {
@@ -206,10 +204,31 @@ export function apply(ctx: Context, cfg: Config) {
         var record = result[0];
         const options:Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
         const locale = "zh-CN";
-        var img_buf = await sharp(path + guild_id + '/'  + record.user+ '/' + record.path).jpeg().toBuffer();
-        var tail = caller_id == record.user ?
-                    "你还想再吃一次吗?":
-                    "不来一份吗?";
+        
+        var isUserinGroup = true;
+        try {
+            await argv.session.bot.getGuildMember(guild_id, record.user);
+        } catch(e) {
+            isUserinGroup = false;
+        }
+        
+        const imagePath = path + guild_id + '/' + record.user + '/' + record.path;
+        var img_buf;
+        if (isUserinGroup) {
+            img_buf = await sharp(imagePath).jpeg().toBuffer();
+        } else {
+            img_buf = await sharp(imagePath).grayscale().jpeg().toBuffer();
+        }
+
+        var tail;
+        if (isUserinGroup) {   
+            tail = caller_id == record.user ?
+            "你还想再吃一次吗?":
+            "不来一份吗?";
+        } else {
+            tail = "（此人已不在群中）";
+        }
+
         argv.session.send(h('p',h.quote(msg_id),h.at(record.user), 
                             `在${new Date(record.stamp).toLocaleDateString(locale, options)}吃了如下大餐`,h('br'), 
                             h.image(img_buf, "image/jpeg"), tail));
