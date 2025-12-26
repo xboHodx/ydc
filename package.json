@@ -1,17 +1,21 @@
 {
   "name": "koishi-plugin-ydc",
   "description": "大餐bot",
-  "contributors": [    
+  "contributors": [
     "yoki"
   ],
   "koishi": {
-    "description": { 
+    "description": {
       "en": "track dc, show statistics",
       "zh": "记录群友大餐瞬间，统计大餐王"
     },
     "service": {
-      "required": ["database"], 
-      "implements": ["dialogue"]
+      "required": [
+        "database"
+      ],
+      "implements": [
+        "dialogue"
+      ]
     }
   },
   "version": "0.0.22",
@@ -28,7 +32,9 @@
     "koishi",
     "plugin"
   ],
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "^25.0.3"
+  },
   "peerDependencies": {
     "koishi": "^4.17.9",
     "sharp": "^0.33.4"
