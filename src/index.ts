@@ -9,9 +9,7 @@ import fs from 'node:fs';
 export const name = 'ydc'
 export const inject = ['database', 'console']
 
-// todo:
-// review: support range expressions, e.g. 2240-2245
-// csm: when the user is not in the group, change text and turn image into grayscale
+//todo: review: support range expressions, e.g. 2240-2245
 
 declare module 'koishi' {
 namespace Command {
@@ -70,7 +68,7 @@ export function apply(ctx: Context, cfg: Config) {
     .option('new', '评选新的大餐王',{hidden: true})
     .action(async (argv)=>{
         if(argv.options.new){
-            if(argv.session.userId!=cfg.master && cfg.readers.includes(argv.session.userId))
+            if(argv.session.userId!=cfg.master && !cfg.readers.includes(argv.session.userId))
                 return h.at(argv.session.userId)+" 你不能那么做";
             // todo: generate dcw
             const day = 1000*60*60*24;
@@ -206,10 +204,31 @@ export function apply(ctx: Context, cfg: Config) {
         var record = result[0];
         const options:Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
         const locale = "zh-CN";
-        var img_buf = await sharp(path + guild_id + '/'  + record.user+ '/' + record.path).jpeg().toBuffer();
-        var tail = caller_id == record.user ?
-                    "你还想再吃一次吗?":
-                    "不来一份吗?";
+        
+        var isUserinGroup = true;
+        try {
+            await argv.session.bot.getGuildMember(guild_id, record.user);
+        } catch(e) {
+            isUserinGroup = false;
+        }
+        
+        const imagePath = path + guild_id + '/' + record.user + '/' + record.path;
+        var img_buf;
+        if (isUserinGroup) {
+            img_buf = await sharp(imagePath).jpeg().toBuffer();
+        } else {
+            img_buf = await sharp(imagePath).grayscale().jpeg().toBuffer();
+        }
+
+        var tail;
+        if (isUserinGroup) {   
+            tail = caller_id == record.user ?
+            "你还想再吃一次吗?":
+            "不来一份吗?";
+        } else {
+            tail = "（此人已不在群中）";
+        }
+
         argv.session.send(h('p',h.quote(msg_id),h.at(record.user), 
                             `在${new Date(record.stamp).toLocaleDateString(locale, options)}吃了如下大餐`,h('br'), 
                             h.image(img_buf, "image/jpeg"), tail));
@@ -218,7 +237,7 @@ export function apply(ctx: Context, cfg: Config) {
     ctx.command('review ',{ hidden: true })
     .option('num', '-n <val:number>', { fallback: 10 })
     .action(async (argv)=>{
-        if(argv.session.userId!=cfg.master && cfg.readers.includes(argv.session.userId))
+        if(argv.session.userId!=cfg.master && !cfg.readers.includes(argv.session.userId))
             return h.at(argv.session.userId)+" 你不能那么做";
         let idx = 0;
         var pending_dcs = await ctx.database.get('pending_dc_table', {});
@@ -246,7 +265,7 @@ image:
     // ctx.command('accept [...args:number]', { hidden: true })
     // .alias('ac')
     // .action(async (argv, ...args)=>{
-    //     if(argv.session.userId!=cfg.master && cfg.readers.includes(argv.session.userId))
+    //     if(argv.session.userId!=cfg.master && !cfg.readers.includes(argv.session.userId))
     //         return h.at(argv.session.userId)+" 你不能那么做";
     //     if(args.length == 0)
     //         return;
@@ -272,7 +291,7 @@ image:
     ctx.command('accept [..._args:string]', { hidden: true })
     .alias('ac')
     .action(async (argv, ..._args)=>{
-        if(argv.session.userId!=cfg.master && cfg.readers.includes(argv.session.userId))
+        if(argv.session.userId!=cfg.master && !cfg.readers.includes(argv.session.userId))
             return h.at(argv.session.userId)+" 你不能那么做";
         if(_args.length == 0)
             return;
@@ -317,7 +336,7 @@ image:
     ctx.command('deny [...args:number]',{ hidden: true })
     .alias('dn')
     .action(async (argv, ...args)=>{
-        if(argv.session.userId!=cfg.master && cfg.readers.includes(argv.session.userId))
+        if(argv.session.userId!=cfg.master && !cfg.readers.includes(argv.session.userId))
             return h.at(argv.session.userId)+" 你不能那么做";
         if(args.length == 0)
             return;
