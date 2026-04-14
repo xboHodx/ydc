@@ -226,7 +226,7 @@ export function apply(ctx: Context, cfg: Config) {
             "你还想再吃一次吗?":
             "不来一份吗?";
         } else {
-            tail = "（此人已不在群中）";
+            tail = "他的大餐仍然陪伴着我们";
         }
 
         argv.session.send(h('p',h.quote(msg_id),h.at(record.user), 
