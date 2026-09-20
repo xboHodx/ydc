@@ -1,12 +1,15 @@
 import { Context, Field } from 'koishi'
 
 declare module 'koishi' {
+    // 为 Koishi 数据库扩展插件表定义。
     interface Tables {
         dc_table: DCTable,
         pending_dc_table: DCTable,
         dc_king: DCKingTable,
     }
 }
+
+// 单条大餐记录的数据结构。
 export interface DCTable {
     id: number
     user: string
@@ -16,6 +19,7 @@ export interface DCTable {
     path: string
 }
 
+// 大餐王统计结果的数据结构。
 export interface DCKing {
     monthly_king: {
         id: string,
@@ -31,11 +35,13 @@ export interface DCKing {
     }
 }
 
+// 大餐王表的数据库行结构。
 export interface DCKingTable {
     guild_id: string
     content: DCKing
 }
 
+// 注册插件依赖的三张数据表。
 export function create_dc_tables(ctx: Context){
     const dc_model:Field.MapField = {
         id: {
@@ -65,7 +71,6 @@ export function create_dc_tables(ctx: Context){
     const dc_config = {
         autoInc: true,
     };
-    var a:Field<number>
     ctx.model.extend('dc_table',dc_model, dc_config);
     ctx.model.extend('pending_dc_table',dc_model, dc_config);
 
