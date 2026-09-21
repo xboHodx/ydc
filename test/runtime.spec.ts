@@ -11,6 +11,7 @@ test('guild locks are isolated per guild', () => {
     dataDir: 'ydc_files',
     smallReply: false,
     csmScopeDefault: 'guild',
+    recordImageMode: 'last',
   })
 
   assert.equal(getGuildLock(runtime.state.locks.ydc, 'guild-a'), false)

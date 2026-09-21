@@ -97,6 +97,7 @@ test('csm returns a friendly message when the guild has no records', async () =>
     dataDir: 'ydc_files',
     smallReply: false,
     csmScopeDefault: 'guild',
+    recordImageMode: 'last',
   }))
 
   const command = commands.get('csm')
@@ -123,6 +124,7 @@ test('dcw new reports failure instead of success when generation throws', async 
     dataDir: 'ydc_files',
     smallReply: false,
     csmScopeDefault: 'guild',
+    recordImageMode: 'last',
   }))
 
   const command = commands.get('dcw')
@@ -159,6 +161,7 @@ test('dcstatistics reports counts for the current guild only', async () => {
     dataDir: 'ydc_files',
     smallReply: false,
     csmScopeDefault: 'guild',
+    recordImageMode: 'last',
   }))
 
   const command = commands.get('dcstatistics')
@@ -197,6 +200,7 @@ test('dcw returns a template fragment for guild king summary', async () => {
     dataDir: 'ydc_files',
     smallReply: false,
     csmScopeDefault: 'guild',
+    recordImageMode: 'last',
   }))
 
   const command = commands.get('dcw')
@@ -241,6 +245,7 @@ test('csm fallback returns a template fragment instead of a string literal', asy
     dataDir: 'ydc_files',
     smallReply: false,
     csmScopeDefault: 'guild',
+    recordImageMode: 'last',
   }))
 
   const command = commands.get('csm')
@@ -311,6 +316,7 @@ test('csm uses global scope from config and labels out-of-guild records plainly'
     dataDir,
     smallReply: false,
     csmScopeDefault: 'global',
+    recordImageMode: 'last',
   })
   const imagePath = buildGuildUserImagePath(runtime.state.paths.root, externalRecord.channelId, externalRecord.user, externalRecord.path)
   await fs.mkdir(path.dirname(imagePath), { recursive: true })
@@ -395,6 +401,7 @@ test('csm guild option overrides global config and keeps current guild mentions'
     dataDir,
     smallReply: false,
     csmScopeDefault: 'global',
+    recordImageMode: 'last',
   })
   const imagePath = buildGuildUserImagePath(runtime.state.paths.root, localRecord.channelId, localRecord.user, localRecord.path)
   await fs.mkdir(path.dirname(imagePath), { recursive: true })

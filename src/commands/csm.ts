@@ -1,10 +1,10 @@
 import { $, Context, Random, h } from 'koishi'
-import sharp from 'sharp'
 
 import type { RuntimeContext } from '../runtime'
 
 import { ensureSession, getOption, resolveCsmScope } from '../utils/argv'
-import { buildGuildUserImagePath } from '../utils/files'
+import { getGuildUserImagePaths } from '../utils/files'
+import { filePathsToImageElements } from '../utils/image'
 
 // 随机抽取一条历史大餐记录。
 export function registerCsmCommand(ctx: Context, runtime: RuntimeContext) {
@@ -14,11 +14,12 @@ export function registerCsmCommand(ctx: Context, runtime: RuntimeContext) {
     ctx.command('csm', '吃什么')
         .option('guild', '-g 只查本群记录')
         .option('global', '-a 查找全局记录')
+        .usage('随机抽取一条历史大餐记录；多图记录会把所有图片合并在同一条消息里发送')
         .action(async (argv) => {
             const session = ensureSession(argv)
             const guildId = session.guildId
             const callerId = session.userId
-            const messageId = session.messageId
+            const quoteMessageId = session.messageId
             if (guildId == null) {
                 return '只能在群聊中使用'
             }
@@ -68,19 +69,19 @@ export function registerCsmCommand(ctx: Context, runtime: RuntimeContext) {
                 isUserInGroup = false
             }
 
-            const imagePath = buildGuildUserImagePath(rootPath, record.channelId, record.user, record.path)
-            // const imageBuffer = isUserInGroup
-            //     ? await sharp(imagePath).jpeg().toBuffer()
-            //     : await sharp(imagePath).grayscale().jpeg().toBuffer()
-            const imageBuffer = await sharp(imagePath).jpeg().toBuffer()
-            
+            // 兼容旧版单图文件和新的多图文件夹
+            const imageElements = await filePathsToImageElements(
+                getGuildUserImagePaths(rootPath, record.channelId, record.user, record.path),
+                false,
+            )
+
             const tail = isUserInGroup
                 ? callerId === record.user ? '你还想再吃一次吗?' : '不来一份吗?'
                 : '虽然他不在群里，但他的大餐将一直陪伴着我们'
 
             const speaker = isUserInGroup ? h.at(record.user) : '其他群的群友'
-            session.send(h('p', h.quote(messageId), speaker,
+            session.send(h('p', h.quote(quoteMessageId), speaker,
                 `在${new Date(record.stamp).toLocaleDateString(locale, options)}吃了如下大餐`, h('br'),
-                h.image(imageBuffer, 'image/jpeg'), tail))
+                ...imageElements, tail))
         })
 }

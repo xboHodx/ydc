@@ -1,10 +1,10 @@
 import { Context, h } from 'koishi'
-import sharp from 'sharp'
 
 import type { RuntimeContext } from '../runtime'
 
 import { ensureSession, getOption } from '../utils/argv'
-import { buildTempImagePath } from '../utils/files'
+import { getTempImagePaths } from '../utils/files'
+import { filePathsToImageElements } from '../utils/image'
 
 // 查看待审核的大餐记录。
 export function registerReviewCommand(ctx: Context, runtime: RuntimeContext) {
@@ -13,6 +13,7 @@ export function registerReviewCommand(ctx: Context, runtime: RuntimeContext) {
 
     ctx.command('review ', { hidden: true })
         .option('num', '-n <val:number>', { fallback: 10 })
+        .usage('查看待审核的大餐记录，可以指定显示数量')
         .action(async (argv) => {
             const session = ensureSession(argv)
             const userId = session.userId!
@@ -30,13 +31,17 @@ export function registerReviewCommand(ctx: Context, runtime: RuntimeContext) {
                     session.send(`显示${num}条`)
                     break
                 }
-                const previewPath = buildTempImagePath(tempPath, pendingDc.path)
+                // 兼容旧版单图文件和新的多图文件夹
+                const imageElements = await filePathsToImageElements(
+                    getTempImagePaths(tempPath, pendingDc.path),
+                    true,
+                )
                 await session.send(`
 id: ${pendingDc.id}
 guild: ${pendingDc.channelId}
 user: ${pendingDc.user}
 image:
-` + h.image(await sharp(previewPath).resize(200).jpeg().toBuffer(), 'image/jpeg'))
+` + imageElements.join(''))
                 await ctx.sleep(1000)
             }
             await ctx.sleep(500)

@@ -15,8 +15,10 @@ export interface DCTable {
     user: string
     channelId: string
     stamp: Date
-    url: string
+    url?: string
     path: string
+    // all 模式记录时保存被引用消息 ID；旧数据可能没有该字段。
+    messageId?: string
 }
 
 // 大餐王统计结果的数据结构。
@@ -66,6 +68,10 @@ export function create_dc_tables(ctx: Context){
         path: {
             type: "string",
             length: 512
+        },
+        messageId: {
+            type: "string",
+            length: 128
         },
     };
     const dc_config = {

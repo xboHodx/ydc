@@ -1,5 +1,11 @@
 import { h } from 'koishi'
 
+// 消息里的一张图片。
+export interface ImageSource {
+    src: string
+    file: string
+}
+
 // 只接受单独存在的一段 @ 提及。
 export function extractSingleAtId(input: string) {
     const elements = h.parse(input)
@@ -13,9 +19,9 @@ export function extractSingleAtId(input: string) {
     return id
 }
 
-// 如果存在多张图片，则返回最后一张。
-export function extractLastImageSource(content: string) {
-    let result: { src: string; file: string } | undefined
+// 按出现顺序提取消息里的所有图片。
+export function extractImageSources(content: string): ImageSource[] {
+    const images: ImageSource[] = []
     for (const element of h.parse(content)) {
         if (element.type !== 'img') {
             continue
@@ -25,7 +31,13 @@ export function extractLastImageSource(content: string) {
         if (typeof src !== 'string' || typeof file !== 'string') {
             continue
         }
-        result = { src, file }
+        images.push({ src, file })
     }
-    return result
+    return images
+}
+
+// 如果存在多张图片，则返回最后一张；没有图片时返回 undefined。
+export function extractLastImageSource(content: string) {
+    const images = extractImageSources(content)
+    return images[images.length - 1]
 }

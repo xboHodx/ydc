@@ -1,10 +1,14 @@
-import fs from 'node:fs'
 import { Context, h } from 'koishi'
 
 import type { RuntimeContext } from '../runtime'
 
 import { ensureSession, parseAcceptArgs } from '../utils/argv'
-import { buildGuildUserDir, buildGuildUserImagePath, buildTempImagePath } from '../utils/files'
+import {
+    buildGuildUserImagePath,
+    buildTempImagePath,
+    copyFileOrDirectory,
+    removeFileOrDirectory,
+} from '../utils/files'
 
 // 批量通过待审核记录。
 export function registerAcceptCommand(ctx: Context, runtime: RuntimeContext) {
@@ -14,6 +18,7 @@ export function registerAcceptCommand(ctx: Context, runtime: RuntimeContext) {
 
     ctx.command('accept [...rawArgs:string]', { hidden: true })
         .alias('ac')
+        .usage('通过待审核记录，支持编号或区间，例如：accept 1 3-5')
         .action(async (argv, ...rawArgs) => {
             const session = ensureSession(argv)
             const userId = session.userId!
@@ -29,21 +34,21 @@ export function registerAcceptCommand(ctx: Context, runtime: RuntimeContext) {
                 return errorMessage.trimStart() || '没有有效序号'
             }
 
-            let inserted = 0
             const items = await ctx.database.get('pending_dc_table', { id: ids })
+            // 先把临时文件/文件夹复制到正式目录
             for (const item of items) {
-                const guildUserDir = buildGuildUserDir(rootPath, item.channelId, item.user)
-                if (!fs.existsSync(guildUserDir)) {
-                    fs.mkdirSync(guildUserDir, { recursive: true })
-                }
-                fs.copyFileSync(
-                    buildTempImagePath(tempPath, item.path),
-                    buildGuildUserImagePath(rootPath, item.channelId, item.user, item.path),
-                )
+                const source = buildTempImagePath(tempPath, item.path)
+                const destination = buildGuildUserImagePath(rootPath, item.channelId, item.user, item.path)
+                copyFileOrDirectory(source, destination)
             }
+
+            // 数据库迁移成功后，再清理临时文件，避免数据库失败导致图片丢失。
             const result = await ctx.database.upsert('dc_table', items)
-            inserted = (result.inserted ?? 0) + (result.modified ?? 0)
+            const inserted = (result.inserted ?? 0) + (result.modified ?? 0)
             await ctx.database.remove('pending_dc_table', { id: ids })
+            for (const item of items) {
+                removeFileOrDirectory(buildTempImagePath(tempPath, item.path))
+            }
             return session.send(`${inserted}/${ids.length}条大餐记录已加入${errorMessage}`)
         })
 }

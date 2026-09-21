@@ -1,10 +1,10 @@
-import fs from 'node:fs'
 import { $, Context, Random, h } from 'koishi'
 
 import type { RuntimeContext } from '../runtime'
 
 import { ensureSession, getOption } from '../utils/argv'
-import { buildGuildUserImagePath, qqImageMime } from '../utils/files'
+import { getGuildUserImagePaths } from '../utils/files'
+import { filePathsToImageElements } from '../utils/image'
 import { extractSingleAtId } from '../utils/message'
 
 // 查询某人的历史大餐罪证。
@@ -42,12 +42,17 @@ export function registerDccrCommand(ctx: Context, runtime: RuntimeContext) {
             if (rand) {
                 record = Random.pick(records)
             }
-            const buffer = fs.readFileSync(buildGuildUserImagePath(rootPath, guildId, userId, record.path))
+
+            // 兼容旧版单图文件和新的多图文件夹
+            const imageElements = await filePathsToImageElements(
+                getGuildUserImagePaths(rootPath, guildId, userId, record.path),
+                false,
+            )
             const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' }
             const locale = 'zh-CN'
             const otherGuilt = records.length === 1
                 ? '除此之外是清白的，暂时'
                 : `除此之外还有${records.length - 1}条罪证`
-            return h('p', h.at(userId), `于${new Date(record.stamp).toLocaleDateString(locale, options)}`, '的罪证在此:', h.image(buffer, qqImageMime(record.path)), otherGuilt)
+            return h('p', h.at(userId), `于${new Date(record.stamp).toLocaleDateString(locale, options)}`, '的罪证在此:', ...imageElements, otherGuilt)
         })
 }
