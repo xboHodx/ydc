@@ -53,6 +53,6 @@ export function registerAcceptCommand(ctx: Context, runtime: RuntimeContext) {
                     // 临时文件清理失败不应影响审核通过的主流程
                 }
             }
-            return session.send(`${inserted}/${ids.length}条大餐记录已加入${errorMessage}`)
+            await session.send(`${inserted}/${ids.length}条大餐记录已加入${errorMessage}`)
         })
 }

@@ -80,12 +80,14 @@ export function normalizeImageFile(file: string) {
 }
 
 // 在指定目录下创建唯一文件夹，如果名字冲突则追加 -1、-2。
+// 返回创建后的完整路径。
 export function createUniqueFolder(basePath: string, preferredName: string) {
     let folderName = preferredName
     let suffix = 1
     while (fs.existsSync(path.join(basePath, folderName))) {
         folderName = `${preferredName}-${suffix++}`
     }
-    fs.mkdirSync(path.join(basePath, folderName), { recursive: true })
-    return folderName
+    const fullPath = path.join(basePath, folderName)
+    fs.mkdirSync(fullPath, { recursive: true })
+    return fullPath
 }

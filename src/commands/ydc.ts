@@ -145,14 +145,13 @@ export function registerYdcCommand(ctx: Context, runtime: RuntimeContext) {
 
                     const matchedDc = dcRecords.find(record => isMatchingRecord(record, recordMode, firstImage, lastImage, messageId))
                     const matchedPending = pendingRecords.find(record => isMatchingRecord(record, recordMode, firstImage, lastImage, messageId))
-
                     // 旧记录与当前记录方式一致：直接提示重复，不再重复写入。
                     if (matchedDc) {
                         const imageElements = await filePathsToImageElements(
                             getGuildUserImagePaths(rootPath, matchedDc.channelId, matchedDc.user, matchedDc.path),
                             cfg.smallReply,
                         )
-                        await session.send(h('p', h.at(dinerId), '的大餐', ...imageElements, '早就被记录了！'))
+                        await session.send(h('p', h.at(dinerId), '的这次大餐早就被记录了！'))
                         return
                     }
                     if (matchedPending) {
@@ -160,7 +159,7 @@ export function registerYdcCommand(ctx: Context, runtime: RuntimeContext) {
                             getTempImagePaths(tempPath, matchedPending.path),
                             cfg.smallReply,
                         )
-                        await session.send(h('p', h.at(dinerId), '的大餐', ...imageElements, '早就被记录到待审核了！'))
+                        await session.send(h('p', h.at(dinerId), '的这次大餐早就被记录到待审核了！'))
                         return
                     }
 
@@ -223,8 +222,9 @@ export function registerYdcCommand(ctx: Context, runtime: RuntimeContext) {
                     }
 
                     await session.send(h('p', h.at(dinerId), '的大餐', ...imageElements, '已经被添加到待审核'))
-                } catch {
-                    await session.send('大餐记录添加失败')
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : String(error)
+                    await session.send(`大餐记录添加失败：异常: ${message}`)
                 } finally {
                     setGuildLock(runtime.state.locks.ydc, guildId, false)
                 }

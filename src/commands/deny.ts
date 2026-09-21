@@ -32,6 +32,6 @@ export function registerDenyCommand(ctx: Context, runtime: RuntimeContext) {
                     // ignore
                 }
             }
-            return session.send(`${result.removed}/${args.length}条大餐记录已拒绝`)
+            await session.send(`${result.removed}/${args.length}条大餐记录已拒绝`)
         })
 }
