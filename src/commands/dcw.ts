@@ -3,6 +3,7 @@ import { Context, h } from 'koishi'
 import type { RuntimeContext } from '../runtime'
 
 import { ensureSession } from '../utils/argv'
+import { formatDate } from '../utils/time'
 
 interface Winner {
   id: string
@@ -57,9 +58,6 @@ export function registerDcwCommand(ctx: Context, runtime: RuntimeContext) {
 
       const weeklyWinner = findWinner(weeklyCounts)
       const monthlyWinner = findWinner(monthlyCounts)
-      const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' }
-      const locale = 'zh-CN'
-      const formatDate = (date: Date) => date.toLocaleDateString(locale, options)
 
       return h('template', [
         `一周大餐王(${formatDate(lastWeek)}~${formatDate(now)}):`, h('br'),

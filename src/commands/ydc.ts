@@ -11,12 +11,12 @@ import {
     buildGuildUserImagePath,
     buildTempImagePath,
     createUniqueFolder,
-    formatTimestampFolderName,
     getGuildUserImagePaths,
     getTempImagePaths,
     normalizeImageFile,
     removeFileOrDirectory,
 } from '../utils/files'
+import { formatTimestampFolderName } from '../utils/time'
 import { extractImageSources, extractSingleAtId, type ImageSource } from '../utils/message'
 import { filePathsToImageElements } from '../utils/image'
 import { getGuildLock, setGuildLock } from '../runtime'

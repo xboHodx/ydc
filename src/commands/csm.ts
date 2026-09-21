@@ -5,6 +5,7 @@ import type { RuntimeContext } from '../runtime'
 import { ensureSession, getOption, resolveCsmScope } from '../utils/argv'
 import { getGuildUserImagePaths } from '../utils/files'
 import { filePathsToImageElements } from '../utils/image'
+import { formatDate } from '../utils/time'
 
 // 随机抽取一条历史大餐记录。
 export function registerCsmCommand(ctx: Context, runtime: RuntimeContext) {
@@ -59,9 +60,6 @@ export function registerCsmCommand(ctx: Context, runtime: RuntimeContext) {
                 ])
             }
             const record = result[0]
-            const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' }
-            const locale = 'zh-CN'
-
             let isUserInGroup = true
             try {
                 await session.bot.getGuildMember(guildId, record.user)
@@ -81,7 +79,7 @@ export function registerCsmCommand(ctx: Context, runtime: RuntimeContext) {
 
             const speaker = isUserInGroup ? h.at(record.user) : '其他群的群友'
             await session.send(h('p', h.quote(quoteMessageId), speaker,
-                `在${new Date(record.stamp).toLocaleDateString(locale, options)}吃了如下大餐`, h('br'),
+                `在${formatDate(record.stamp)}吃了如下大餐`, h('br'),
                 ...imageElements, tail))
         })
 }

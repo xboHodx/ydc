@@ -16,23 +16,6 @@ export function buildTempImagePath(tempPath: string, filename: string) {
     return path.join(tempPath, filename)
 }
 
-// 将消息时间格式化为 YYYYMMDD-HHmmss，用作 all 模式的图片文件夹名。
-export function formatTimestampFolderName(stamp: number | Date) {
-    const date = new Date(stamp)
-    const pad = (value: number) => String(value).padStart(2, '0')
-    const datePart = [
-        date.getFullYear(),
-        pad(date.getMonth() + 1),
-        pad(date.getDate()),
-    ].join('')
-    const timePart = [
-        pad(date.getHours()),
-        pad(date.getMinutes()),
-        pad(date.getSeconds()),
-    ].join('')
-    return `${datePart}-${timePart}`
-}
-
 // 判断路径是否指向文件夹。
 export function isDirectory(filePath: string) {
     try {

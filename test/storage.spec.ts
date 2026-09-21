@@ -5,7 +5,8 @@ import path from 'node:path'
 import test from 'node:test'
 import sharp from 'sharp'
 
-import { formatTimestampFolderName, getImagePathsFromFullPath } from '../src/utils/files'
+import { getImagePathsFromFullPath } from '../src/utils/files'
+import { formatTimestampFolderName } from '../src/utils/time'
 
 test('formatTimestampFolderName formats local date and time', () => {
   const date = new Date(2026, 3, 14, 12, 34, 56)
