@@ -80,7 +80,7 @@ export function registerCsmCommand(ctx: Context, runtime: RuntimeContext) {
                 : '虽然他不在群里，但他的大餐将一直陪伴着我们'
 
             const speaker = isUserInGroup ? h.at(record.user) : '其他群的群友'
-            session.send(h('p', h.quote(quoteMessageId), speaker,
+            await session.send(h('p', h.quote(quoteMessageId), speaker,
                 `在${new Date(record.stamp).toLocaleDateString(locale, options)}吃了如下大餐`, h('br'),
                 ...imageElements, tail))
         })

@@ -25,8 +25,12 @@ export function registerDenyCommand(ctx: Context, runtime: RuntimeContext) {
             const items = await ctx.database.get('pending_dc_table', { id: args })
             const result = await ctx.database.remove('pending_dc_table', { id: args })
             for (const item of items) {
-                // 拒绝后同步清理临时图片/文件夹
-                removeFileOrDirectory(buildTempImagePath(tempPath, item.path))
+                // 拒绝后同步清理临时图片/文件夹；清理失败不应影响拒绝结果
+                try {
+                    removeFileOrDirectory(buildTempImagePath(tempPath, item.path))
+                } catch {
+                    // ignore
+                }
             }
             return session.send(`${result.removed}/${args.length}条大餐记录已拒绝`)
         })

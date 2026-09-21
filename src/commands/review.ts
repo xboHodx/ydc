@@ -11,7 +11,7 @@ export function registerReviewCommand(ctx: Context, runtime: RuntimeContext) {
     const cfg = runtime.config
     const tempPath = runtime.state.paths.temp
 
-    ctx.command('review ', { hidden: true })
+    ctx.command('review', { hidden: true })
         .option('num', '-n <val:number>', { fallback: 10 })
         .usage('查看待审核的大餐记录，可以指定显示数量')
         .action(async (argv) => {
@@ -24,11 +24,11 @@ export function registerReviewCommand(ctx: Context, runtime: RuntimeContext) {
             }
             let idx = 0
             const pendingDcs = await ctx.database.get('pending_dc_table', {})
-            session.send(`共有${pendingDcs.length}条大餐待审核`)
+            await session.send(`共有${pendingDcs.length}条大餐待审核`)
             await ctx.sleep(1000)
             for (const pendingDc of pendingDcs) {
                 if (++idx > num) {
-                    session.send(`显示${num}条`)
+                    await session.send(`显示${num}条`)
                     break
                 }
                 // 兼容旧版单图文件和新的多图文件夹
@@ -45,7 +45,7 @@ image:
                 await ctx.sleep(1000)
             }
             await ctx.sleep(500)
-            session.send(`以上`)
+            await session.send(`以上`)
             return
         })
 }

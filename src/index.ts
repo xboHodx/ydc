@@ -1,6 +1,6 @@
 import './koishi-augment'
 import { Context, h } from 'koishi'
-import { create_dc_tables } from './database'
+import { createDcTables } from './database'
 import { registerCommands } from './commands'
 import { Config } from './config'
 import { createRuntime, prepareRuntimeDirectories } from './runtime'
@@ -15,7 +15,7 @@ export function apply(ctx: Context, cfg: Config) {
     const runtime = createRuntime(cfg)
     // 启动时注册数据库模型。
     ctx.on('ready', () => {
-        create_dc_tables(ctx)
+        createDcTables(ctx)
     })
     prepareRuntimeDirectories(ctx, runtime)
 
@@ -28,7 +28,8 @@ export function apply(ctx: Context, cfg: Config) {
         if (messageElements.length === 0 || messageElements[0].type !== 'at') {
             return
         }
-        if (messageElements[0].attrs.id !== cfg.self) {
+        const targetId = messageElements[0].attrs?.id
+        if (typeof targetId !== 'string' || targetId !== cfg.self) {
             return
         }
 

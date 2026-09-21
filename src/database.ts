@@ -21,7 +21,7 @@ export interface DCTable {
 }
 
 // 注册插件依赖的两张数据表。
-export function create_dc_tables(ctx: Context){
+export function createDcTables(ctx: Context){
     const dc_model:Field.MapField = {
         id: {
             type: 'unsigned',

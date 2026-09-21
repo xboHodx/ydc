@@ -47,7 +47,11 @@ export function registerAcceptCommand(ctx: Context, runtime: RuntimeContext) {
             const inserted = (result.inserted ?? 0) + (result.modified ?? 0)
             await ctx.database.remove('pending_dc_table', { id: ids })
             for (const item of items) {
-                removeFileOrDirectory(buildTempImagePath(tempPath, item.path))
+                try {
+                    removeFileOrDirectory(buildTempImagePath(tempPath, item.path))
+                } catch {
+                    // 临时文件清理失败不应影响审核通过的主流程
+                }
             }
             return session.send(`${inserted}/${ids.length}条大餐记录已加入${errorMessage}`)
         })

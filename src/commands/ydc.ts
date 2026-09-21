@@ -28,7 +28,7 @@ function getMessageId(target: { id?: string, messageId?: string }) {
 
 // 在两张记录表里同时查找可能重复的旧记录。
 async function findDuplicateRecords(
-    database: any,
+    database: Context['database'],
     table: 'dc_table' | 'pending_dc_table',
     firstImage: ImageSource,
     lastImage: ImageSource,
@@ -168,10 +168,10 @@ export function registerYdcCommand(ctx: Context, runtime: RuntimeContext) {
                     if (recordMode === 'all') {
                         // all 模式：下载全部图片到按时间命名的临时文件夹。
                         const tempFolder = createUniqueFolder(tempPath, folderName)
-                        for (const [index, image] of images.entries()) {
-                            const buffer = await downloadImage(image.src)
-                            fs.writeFileSync(path.join(tempFolder, `${index}${getImageExtension(image.file)}`), buffer)
-                        }
+                        const buffers = await Promise.all(images.map(image => downloadImage(image.src)))
+                        buffers.forEach((buffer, index) => {
+                            fs.writeFileSync(path.join(tempFolder, `${index}${getImageExtension(images[index].file)}`), buffer)
+                        })
 
                         await ctx.database.create('pending_dc_table', {
                             channelId: guildId,
@@ -207,11 +207,19 @@ export function registerYdcCommand(ctx: Context, runtime: RuntimeContext) {
                     // 新记录创建成功后再删除不匹配的旧记录，避免新记录失败时旧数据丢失。
                     for (const record of dcRecords) {
                         await ctx.database.remove('dc_table', { id: record.id })
-                        removeFileOrDirectory(buildGuildUserImagePath(rootPath, record.channelId, record.user, record.path))
+                        try {
+                            removeFileOrDirectory(buildGuildUserImagePath(rootPath, record.channelId, record.user, record.path))
+                        } catch {
+                            // 旧文件清理失败不阻塞重录流程
+                        }
                     }
                     for (const record of pendingRecords) {
                         await ctx.database.remove('pending_dc_table', { id: record.id })
-                        removeFileOrDirectory(buildTempImagePath(tempPath, record.path))
+                        try {
+                            removeFileOrDirectory(buildTempImagePath(tempPath, record.path))
+                        } catch {
+                            // 旧文件清理失败不阻塞重录流程
+                        }
                     }
 
                     await session.send(h('p', h.at(dinerId), '的大餐', ...imageElements, '已经被添加到待审核'))
