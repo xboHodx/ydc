@@ -9,14 +9,3 @@ type ImageMessageBinaryPayload = [data: ArrayBuffer | Buffer | ArrayBufferView, 
 
 // 大餐图片消息可用的统一载荷类型。
 export type ImageMessagePayload = ImageMessageTextPayload | ImageMessageBinaryPayload
-
-// 用户到计数值的映射。
-export type UserCountMap = Record<string, number>
-
-// 单个群内周/月统计的计数容器。
-export interface GuildCountMap {
-    weekly: UserCountMap
-    monthly: UserCountMap
-}
-
-

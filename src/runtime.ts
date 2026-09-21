@@ -11,7 +11,6 @@ export interface RuntimePaths {
 
 // 插件运行时使用的互斥锁集合。
 export interface RuntimeLocks {
-    dckingGen: Record<string, boolean>
     ydc: Record<string, boolean>
 }
 
@@ -38,7 +37,6 @@ export function createRuntime(config: Config): RuntimeContext {
                 temp: path.join(rootPath, 'tmp'),
             },
             locks: {
-                dckingGen: {},
                 ydc: {},
             },
         },

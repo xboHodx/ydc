@@ -110,17 +110,14 @@ test('csm returns a friendly message when the guild has no records', async () =>
   assert.match(String(result), /还没有|暂无/)
 })
 
-test('dcw new reports failure instead of success when generation throws', async () => {
+test('dcw shows no winners when there are no records', async () => {
   const { ctx, commands } = createCommandContext()
-  ctx.database.get = async () => {
-    throw new Error('boom')
-  }
-  ctx.database.upsert = async () => ({ inserted: 0, modified: 0 })
+  ctx.database.get = async () => []
 
   registerCommands(ctx, createRuntime({
     master: 'master',
     self: 'self',
-    readers: ['reader'],
+    readers: [],
     dataDir: 'ydc_files',
     smallReply: false,
     csmScopeDefault: 'guild',
@@ -130,17 +127,13 @@ test('dcw new reports failure instead of success when generation throws', async 
   const command = commands.get('dcw')
   assert.ok(command?.action)
 
-  const { session, sent } = createSession()
-  const result = await command.action({
-    session,
-    options: { new: true },
-  })
+  const { session } = createSession()
+  const result = await command.action({ session })
+  const normalized = h.normalize(result).map(String).join('')
 
-  await new Promise(resolve => setTimeout(resolve, 0))
-
-  assert.match(String(result), /生成|统计/)
-  assert.equal(sent.some(message => message.includes('新的大餐王已诞生')), false)
-  assert.equal(sent.some(message => message.includes('失败')), true)
+  assert.equal(h.normalize(result)[0]?.type, 'template')
+  assert.match(normalized, /本周暂无大餐王/)
+  assert.match(normalized, /本月暂无大餐王/)
 })
 
 test('dcstatistics reports counts for the current guild only', async () => {
@@ -173,25 +166,18 @@ test('dcstatistics reports counts for the current guild only', async () => {
   assert.equal(result, '本群共有3条已保存大餐记录和1条待审核大餐记录')
 })
 
-test('dcw returns a template fragment for guild king summary', async () => {
+test('dcw computes weekly and monthly kings from current guild records', async () => {
   const { ctx, commands } = createCommandContext()
-  ctx.database.get = async () => [{
-    guild_id: 'guild-1',
-    content: {
-      weekly_king: {
-        id: 'user-weekly',
-        times: 2,
-        start: new Date('2026-04-01T00:00:00.000Z'),
-        end: new Date('2026-04-08T00:00:00.000Z'),
-      },
-      monthly_king: {
-        id: 'user-monthly',
-        times: 6,
-        start: new Date('2026-03-10T00:00:00.000Z'),
-        end: new Date('2026-04-08T00:00:00.000Z'),
-      },
-    },
-  }]
+  const now = Date.now()
+  const day = 1000 * 60 * 60 * 24
+  ctx.database.get = async () => [
+    { user: 'user-weekly', channelId: 'guild-1', stamp: new Date(now - day) },
+    { user: 'user-weekly', channelId: 'guild-1', stamp: new Date(now - day * 2) },
+    { user: 'user-monthly', channelId: 'guild-1', stamp: new Date(now - day * 20) },
+    { user: 'user-monthly', channelId: 'guild-1', stamp: new Date(now - day * 21) },
+    { user: 'user-monthly', channelId: 'guild-1', stamp: new Date(now - day * 22) },
+    { user: 'user-outside', channelId: 'guild-2', stamp: new Date(now - day) },
+  ]
 
   registerCommands(ctx, createRuntime({
     master: 'master',
@@ -207,13 +193,15 @@ test('dcw returns a template fragment for guild king summary', async () => {
   assert.ok(command?.action)
 
   const { session } = createSession()
-  const result = await command.action({ session, options: {} })
+  const result = await command.action({ session })
   const normalized = h.normalize(result).map(String).join('')
 
   assert.equal(h.normalize(result)[0]?.type, 'template')
   assert.match(normalized, /user-weekly/)
   assert.match(normalized, /user-monthly/)
-  assert.match(normalized, /<br\/>/)
+  assert.match(normalized, /大餐2次/)
+  assert.match(normalized, /大餐3次/)
+  assert.doesNotMatch(normalized, /user-outside/)
 })
 
 test('csm fallback returns a template fragment instead of a string literal', async () => {

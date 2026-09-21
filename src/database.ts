@@ -5,7 +5,6 @@ declare module 'koishi' {
     interface Tables {
         dc_table: DCTable,
         pending_dc_table: DCTable,
-        dc_king: DCKingTable,
     }
 }
 
@@ -21,29 +20,7 @@ export interface DCTable {
     messageId?: string
 }
 
-// 大餐王统计结果的数据结构。
-export interface DCKing {
-    monthly_king: {
-        id: string,
-        times: number,
-        start: Date,
-        end: Date
-    }
-    weekly_king: {
-        id:string,
-        times: number,
-        start: Date,
-        end: Date
-    }
-}
-
-// 大餐王表的数据库行结构。
-export interface DCKingTable {
-    guild_id: string
-    content: DCKing
-}
-
-// 注册插件依赖的三张数据表。
+// 注册插件依赖的两张数据表。
 export function create_dc_tables(ctx: Context){
     const dc_model:Field.MapField = {
         id: {
@@ -80,9 +57,4 @@ export function create_dc_tables(ctx: Context){
     ctx.model.extend('dc_table',dc_model, dc_config);
     ctx.model.extend('pending_dc_table',dc_model, dc_config);
 
-    const dc_king_model:Field.MapField = {
-        guild_id: "string",
-        content: "json"
-    }
-    ctx.model.extend('dc_king',dc_king_model, {primary: "guild_id"});
 }
